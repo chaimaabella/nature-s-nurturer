@@ -13,7 +13,7 @@ const initialMessages: Message[] = [
   {
     id: "welcome",
     role: "assistant",
-    content: "Bonjour ! 🌿 Je suis Flore, votre assistant botanique. Comment puis-je vous aider avec vos plantes aujourd'hui ?",
+    content: "Bonjour ! 🌿 Je suis Floria, votre assistant botanique. Comment puis-je vous aider avec vos plantes aujourd'hui ?",
   },
 ];
 
@@ -74,7 +74,7 @@ export function ChatWidget() {
                   <Leaf className="h-5 w-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h3 className="font-display font-semibold text-foreground">Flore</h3>
+                  <h3 className="font-display font-semibold text-foreground">Floria</h3>
                   <p className="text-xs text-muted-foreground">Assistant botanique</p>
                 </div>
               </div>
