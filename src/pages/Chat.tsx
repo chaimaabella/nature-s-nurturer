@@ -1,0 +1,204 @@
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams, Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Send, Leaf, ArrowLeft, Sparkles } from "lucide-react";
+import { Header } from "@/components/Header";
+
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+}
+
+const suggestedQuestions = [
+  "Pourquoi les feuilles de mon monstera jaunissent-elles ?",
+  "Comment bouturer un pothos ?",
+  "Ma plante a des taches brunes, que faire ?",
+  "Quelle est la fréquence d'arrosage pour un cactus ?",
+];
+
+export default function Chat() {
+  const [searchParams] = useSearchParams();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    // Check for initial question from URL
+    const initialQuestion = searchParams.get("q");
+    if (initialQuestion) {
+      handleSend(initialQuestion);
+    }
+  }, []);
+
+  const handleSend = async (messageText?: string) => {
+    const text = messageText || input.trim();
+    if (!text || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: text,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    // Simulate AI response (will be replaced with actual API)
+    setTimeout(() => {
+      const responses: Record<string, string> = {
+        "monstera": "Les feuilles jaunes sur un Monstera peuvent être causées par plusieurs facteurs :\n\n**Arrosage excessif** - C'est la cause la plus fréquente. Vérifiez que le sol sèche entre les arrosages.\n\n**Manque de lumière** - Le Monstera a besoin de lumière indirecte brillante.\n\n**Carence en nutriments** - Un engrais équilibré tous les mois pendant la période de croissance peut aider.\n\n**Plan d'action :**\n1. Vérifiez l'humidité du sol avant d'arroser\n2. Placez la plante près d'une fenêtre lumineuse\n3. Envisagez un rempotage si le sol reste détrempé",
+        "pothos": "Le bouturage du Pothos est très simple :\n\n**Étapes :**\n1. Coupez une tige avec au moins 4-5 feuilles, juste en dessous d'un nœud\n2. Retirez les 1-2 feuilles du bas\n3. Placez la bouture dans l'eau claire\n4. Changez l'eau tous les 3-4 jours\n5. Attendez que les racines fassent 5-10 cm (2-4 semaines)\n6. Plantez dans un terreau bien drainant\n\n**Conseils :**\n- Utilisez un récipient transparent pour surveiller les racines\n- Évitez le soleil direct sur les boutures",
+        "taches": "Les taches brunes peuvent indiquer plusieurs problèmes :\n\n**Causes possibles :**\n- **Coup de soleil** - Déplacez la plante loin du soleil direct\n- **Excès d'eau** - Laissez sécher le sol entre les arrosages\n- **Maladie fongique** - Améliorez la circulation d'air\n- **Eau calcaire** - Utilisez de l'eau filtrée ou de pluie\n\n**Que faire :**\n1. Retirez les feuilles très abîmées\n2. Ajustez l'arrosage\n3. Vérifiez le drainage du pot\n4. Observez pendant une semaine",
+        "cactus": "**Fréquence d'arrosage pour un cactus :**\n\n**Été (croissance active) :**\n- Arrosez quand le sol est complètement sec (environ tous les 7-14 jours)\n\n**Hiver (repos) :**\n- Réduisez drastiquement (1 fois par mois ou moins)\n\n**Méthode :**\n1. Insérez votre doigt à 2-3 cm dans le sol\n2. S'il est sec, arrosez abondamment\n3. Videz la soucoupe après 30 minutes\n\n**Important :** Mieux vaut sous-arroser que trop arroser. Les cactus stockent l'eau et tolèrent la sécheresse.",
+      };
+
+      let responseContent = "Je comprends votre question sur les plantes ! 🌱\n\nPour vous donner les meilleurs conseils, voici quelques points généraux :\n\n1. **Observez votre plante** - Les signes visuels (couleur des feuilles, texture du sol) sont essentiels.\n\n2. **Vérifiez les bases** - Lumière, eau, température et humidité sont les piliers.\n\n3. **Soyez patient** - Les plantes prennent du temps à réagir aux changements.\n\nN'hésitez pas à me poser des questions plus spécifiques !";
+
+      // Check for keyword matches
+      for (const [keyword, response] of Object.entries(responses)) {
+        if (text.toLowerCase().includes(keyword)) {
+          responseContent = response;
+          break;
+        }
+      }
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: responseContent,
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+      setIsLoading(false);
+    }, 1500);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur">
+        <div className="container flex h-16 items-center gap-4">
+          <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="h-5 w-5" />
+            <span className="hidden sm:inline">Retour</span>
+          </Link>
+          
+          <div className="flex-1 flex items-center justify-center gap-2">
+            <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
+              <Leaf className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="font-display text-xl font-semibold text-foreground">Flore</span>
+          </div>
+          
+          <div className="w-20" /> {/* Spacer for centering */}
+        </div>
+      </header>
+
+      {/* Chat Area */}
+      <main className="flex-1 overflow-hidden">
+        <div className="h-full max-w-3xl mx-auto flex flex-col">
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+            {messages.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center px-4">
+                <div className="h-20 w-20 rounded-2xl bg-accent flex items-center justify-center mb-6">
+                  <Sparkles className="h-10 w-10 text-primary" />
+                </div>
+                <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">
+                  Bienvenue sur Flore
+                </h1>
+                <p className="text-muted-foreground max-w-md mb-8">
+                  Posez-moi vos questions sur l'entretien de vos plantes. Je suis là pour vous aider !
+                </p>
+                
+                <div className="grid sm:grid-cols-2 gap-3 w-full max-w-lg">
+                  {suggestedQuestions.map((question, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSend(question)}
+                      className="p-4 text-left rounded-xl bg-card border border-border hover:border-primary/50 hover:shadow-nature transition-all text-sm text-foreground"
+                    >
+                      "{question}"
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <>
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-5 py-3 ${
+                        message.role === "user"
+                          ? "bg-primary text-primary-foreground rounded-br-md"
+                          : "bg-card border border-border text-foreground rounded-bl-md"
+                      }`}
+                    >
+                      <div className="text-sm md:text-base whitespace-pre-line">
+                        {message.content}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-card border border-border rounded-2xl rounded-bl-md px-5 py-4">
+                      <div className="flex gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-primary/40 animate-pulse-soft" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-primary/40 animate-pulse-soft" style={{ animationDelay: "0.2s" }} />
+                        <span className="h-2.5 w-2.5 rounded-full bg-primary/40 animate-pulse-soft" style={{ animationDelay: "0.4s" }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </>
+            )}
+          </div>
+
+          {/* Input Area */}
+          <div className="border-t border-border bg-background p-4 md:p-6">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSend();
+              }}
+              className="flex gap-3"
+            >
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Posez une question sur vos plantes..."
+                className="flex-1 px-5 py-3 rounded-xl bg-muted border-0 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 text-base"
+              />
+              <Button
+                type="submit"
+                variant="nature"
+                size="lg"
+                disabled={!input.trim() || isLoading}
+                className="px-6"
+              >
+                <Send className="h-5 w-5" />
+                <span className="hidden sm:inline ml-2">Envoyer</span>
+              </Button>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
