@@ -15,7 +15,7 @@ export function HeroSection({
   ctaText = "Posez une question",
 }: HeroSectionProps) {
   return (
-    <section className="relative min-h-[85vh] flex items-center nature-gradient overflow-hidden">
+    <section className="relative min-h-[85vh] flex items-center nature-gradient overflow-hidden px-4 sm:px-6 py-16 sm:py-20 lg:py-24">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-1/4 -right-1/4 w-1/2 h-1/2 bg-nature-sage/20 rounded-full blur-3xl" />
