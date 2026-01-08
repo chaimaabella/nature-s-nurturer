@@ -1,4 +1,4 @@
-# Flore
+# Floria
 
 Assistant intelligent pour prendre soin de vos plantes.
 

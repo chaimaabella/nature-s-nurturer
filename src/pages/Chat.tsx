@@ -97,7 +97,7 @@ export default function Chat() {
             <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
               <Leaf className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-semibold text-foreground">Flore</span>
+            <span className="font-display text-xl font-semibold text-foreground">Floria</span>
           </div>
           
           <div className="w-20" /> {/* Spacer for centering */}
@@ -115,7 +115,7 @@ export default function Chat() {
                   <Sparkles className="h-10 w-10 text-primary" />
                 </div>
                 <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">
-                  Bienvenue sur Flore
+                  Bienvenue sur Floria
                 </h1>
                 <p className="text-muted-foreground max-w-md mb-8">
                   Posez-moi vos questions sur l'entretien de vos plantes. Je suis là pour vous aider !
