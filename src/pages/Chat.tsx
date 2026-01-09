@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Send, Leaf, ArrowLeft, Sparkles } from "lucide-react";
-import { Header } from "@/components/Header";
+import { markdownToHtml } from "@/lib/markdown";
 
 interface Message {
   id: string;
@@ -147,9 +147,16 @@ export default function Chat() {
                           : "bg-card border border-border text-foreground rounded-bl-md"
                       }`}
                     >
-                      <div className="text-sm md:text-base whitespace-pre-line">
-                        {message.content}
-                      </div>
+                      {message.role === "assistant" ? (
+                        <div
+                          className="text-sm md:text-base leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: markdownToHtml(message.content) }}
+                        />
+                      ) : (
+                        <div className="text-sm md:text-base whitespace-pre-line">
+                          {message.content}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
