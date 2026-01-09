@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, X, Send, Leaf, ArrowUpRight } from "lucide-react";
+import { MessageCircle, X, Send, ArrowUpRight } from "lucide-react";
+import logoImage from "@/assets/#3f7559.png";
 import { markdownToHtml } from "@/lib/markdown";
 
 interface Message {
@@ -71,9 +72,7 @@ export function ChatWidget() {
           <div className="p-4 border-b border-border bg-primary/5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
-                  <Leaf className="h-5 w-5 text-primary-foreground" />
-                </div>
+                <img src={logoImage} alt="Floria" className="h-10 w-10 rounded-full object-cover" />
                 <div>
                   <h3 className="font-display font-semibold text-foreground">Floria</h3>
                   <p className="text-xs text-muted-foreground">Assistant botanique</p>

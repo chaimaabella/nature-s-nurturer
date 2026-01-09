@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Leaf, Menu, X } from "lucide-react";
-import logoImage from "@/assets/logo.png";
+import { Menu, X } from "lucide-react";
+import logoImage from "@/assets/#3f7559.png";
 
 const navLinks = [
   { label: "Accueil", href: "/" },
