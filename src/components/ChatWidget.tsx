@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, X, Send, Leaf, ArrowUpRight } from "lucide-react";
+import { markdownToHtml } from "@/lib/markdown";
 
 interface Message {
   id: string;
@@ -100,7 +101,14 @@ export function ChatWidget() {
                       : "bg-muted text-foreground rounded-bl-md"
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
+                  {message.role === "assistant" ? (
+                    <div
+                      className="text-sm leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: markdownToHtml(message.content) }}
+                    />
+                  ) : (
+                    <p className="text-sm whitespace-pre-line">{message.content}</p>
+                  )}
                 </div>
               </div>
             ))}
