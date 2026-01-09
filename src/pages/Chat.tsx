@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Send, Leaf, ArrowLeft, Sparkles } from "lucide-react";
+import { Send, ArrowLeft, Sparkles } from "lucide-react";
 import { markdownToHtml } from "@/lib/markdown";
+import logoImage from "@/assets/logo-nature.png";
 
 interface Message {
   id: string;
@@ -94,9 +95,11 @@ export default function Chat() {
           </Link>
           
           <div className="flex-1 flex items-center justify-center gap-2">
-            <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
-              <Leaf className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img
+              src={logoImage}
+              alt="Floria"
+              className="h-9 w-9 rounded-lg object-cover"
+            />
             <span className="font-display text-xl font-semibold text-foreground">Floria</span>
           </div>
           
