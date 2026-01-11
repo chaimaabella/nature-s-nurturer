@@ -21,7 +21,7 @@ export function ChatWidget() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const conversationIdRef = useRef(0);
-  const displayMessages = messages.length > 0 ? messages : initialMessages;
+  const displayMessages = messages.length > 0 ? [initialMessages[0], ...messages] : initialMessages;
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -53,10 +53,6 @@ export function ChatWidget() {
   };
 
   const handleReset = () => {
-    if (typeof window !== "undefined") {
-      const shouldReset = window.confirm("Voulez-vous démarrer une nouvelle conversation ? Votre historique sera effacé.");
-      if (!shouldReset) return;
-    }
     conversationIdRef.current += 1;
     resetMessages();
     setInput("");
