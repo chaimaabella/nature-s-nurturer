@@ -87,10 +87,6 @@ export default function Chat() {
   };
 
   const handleReset = () => {
-    if (typeof window !== "undefined") {
-      const shouldReset = window.confirm("Voulez-vous démarrer une nouvelle conversation ? Votre historique sera effacé.");
-      if (!shouldReset) return;
-    }
     conversationIdRef.current += 1;
     resetMessages();
     setInput("");
