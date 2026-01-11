@@ -1,15 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Send, ArrowLeft, Sparkles } from "lucide-react";
+import { Send, ArrowLeft, Sparkles, RefreshCw } from "lucide-react";
 import { markdownToHtml } from "@/lib/markdown";
 import logoImage from "@/assets/logo-nature.png";
+import { useChatHistory, type ChatMessage } from "@/hooks/use-chat-history";
 
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
+type Message = ChatMessage;
 
 const suggestedQuestions = [
   "Pourquoi les feuilles de mon monstera jaunissent-elles ?",
@@ -20,10 +17,11 @@ const suggestedQuestions = [
 
 export default function Chat() {
   const [searchParams] = useSearchParams();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { messages, addMessage, resetMessages } = useChatHistory();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const conversationIdRef = useRef(0);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -51,12 +49,16 @@ export default function Chat() {
       content: text,
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    addMessage(userMessage);
     setInput("");
     setIsLoading(true);
+    const conversationId = conversationIdRef.current;
 
     // Simulate AI response (will be replaced with actual API)
     setTimeout(() => {
+      if (conversationIdRef.current !== conversationId) {
+        return;
+      }
       const responses: Record<string, string> = {
         "monstera": "Les feuilles jaunes sur un Monstera peuvent être causées par plusieurs facteurs :\n\n**Arrosage excessif** - C'est la cause la plus fréquente. Vérifiez que le sol sèche entre les arrosages.\n\n**Manque de lumière** - Le Monstera a besoin de lumière indirecte brillante.\n\n**Carence en nutriments** - Un engrais équilibré tous les mois pendant la période de croissance peut aider.\n\n**Plan d'action :**\n1. Vérifiez l'humidité du sol avant d'arroser\n2. Placez la plante près d'une fenêtre lumineuse\n3. Envisagez un rempotage si le sol reste détrempé",
         "pothos": "Le bouturage du Pothos est très simple :\n\n**Étapes :**\n1. Coupez une tige avec au moins 4-5 feuilles, juste en dessous d'un nœud\n2. Retirez les 1-2 feuilles du bas\n3. Placez la bouture dans l'eau claire\n4. Changez l'eau tous les 3-4 jours\n5. Attendez que les racines fassent 5-10 cm (2-4 semaines)\n6. Plantez dans un terreau bien drainant\n\n**Conseils :**\n- Utilisez un récipient transparent pour surveiller les racines\n- Évitez le soleil direct sur les boutures",
@@ -79,9 +81,20 @@ export default function Chat() {
         role: "assistant",
         content: responseContent,
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+      addMessage(assistantMessage);
       setIsLoading(false);
     }, 1500);
+  };
+
+  const handleReset = () => {
+    if (typeof window !== "undefined") {
+      const shouldReset = window.confirm("Voulez-vous démarrer une nouvelle conversation ? Votre historique sera effacé.");
+      if (!shouldReset) return;
+    }
+    conversationIdRef.current += 1;
+    resetMessages();
+    setInput("");
+    setIsLoading(false);
   };
 
   return (
@@ -102,8 +115,19 @@ export default function Chat() {
             />
             <span className="font-display text-xl font-semibold text-foreground">Floria</span>
           </div>
-          
-          <div className="w-20" /> {/* Spacer for centering */}
+
+          <div className="flex w-20 justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={handleReset}
+              disabled={messages.length === 0 && !isLoading}
+              aria-label="Nouvelle conversation"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </header>
 

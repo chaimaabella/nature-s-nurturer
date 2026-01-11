@@ -1,15 +1,11 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, X, Send, ArrowUpRight } from "lucide-react";
+import { MessageCircle, X, Send, RefreshCw } from "lucide-react";
 import logoImage from "@/assets/logo-nature.png";
 import { markdownToHtml } from "@/lib/markdown";
+import { useChatHistory, type ChatMessage } from "@/hooks/use-chat-history";
 
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
+type Message = ChatMessage;
 
 const initialMessages: Message[] = [
   {
@@ -21,9 +17,11 @@ const initialMessages: Message[] = [
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const { messages, addMessage, resetMessages } = useChatHistory();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const conversationIdRef = useRef(0);
+  const displayMessages = messages.length > 0 ? messages : initialMessages;
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -34,20 +32,35 @@ export function ChatWidget() {
       content: input.trim(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    addMessage(userMessage);
     setInput("");
     setIsLoading(true);
+    const conversationId = conversationIdRef.current;
 
     // Simulate AI response (will be replaced with actual API)
     setTimeout(() => {
+      if (conversationIdRef.current !== conversationId) {
+        return;
+      }
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "Je comprends votre question ! Pour une réponse complète et personnalisée, je vous invite à utiliser notre assistant complet. Cliquez sur le bouton ci-dessous pour accéder à toutes les fonctionnalités.",
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+      addMessage(assistantMessage);
       setIsLoading(false);
     }, 1000);
+  };
+
+  const handleReset = () => {
+    if (typeof window !== "undefined") {
+      const shouldReset = window.confirm("Voulez-vous démarrer une nouvelle conversation ? Votre historique sera effacé.");
+      if (!shouldReset) return;
+    }
+    conversationIdRef.current += 1;
+    resetMessages();
+    setInput("");
+    setIsLoading(false);
   };
 
   return (
@@ -78,17 +91,22 @@ export function ChatWidget() {
                   <p className="text-xs text-muted-foreground">Assistant botanique</p>
                 </div>
               </div>
-              <Link to="/chat">
-                <Button variant="ghost" size="sm" className="text-xs">
-                  Ouvrir <ArrowUpRight className="h-3 w-3 ml-1" />
-                </Button>
-              </Link>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleReset}
+                aria-label="Nouvelle conversation"
+                disabled={messages.length === 0 && !isLoading}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
           {/* Messages */}
           <div className="h-72 overflow-y-auto p-4 space-y-4">
-            {messages.map((message) => (
+            {displayMessages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
