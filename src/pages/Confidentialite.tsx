@@ -13,7 +13,7 @@ export default function Confidentialite() {
               Politique de confidentialité
             </h1>
             <p className="text-muted-foreground max-w-2xl">
-              Flore est un projet d&apos;école mené à EPITECH Marseille. Cette
+              Floria est un projet d&apos;école mené à EPITECH Marseille. Cette
               politique explique comment les données sont traitées dans le cadre
               du prototype et des démonstrations.
             </p>
@@ -50,7 +50,7 @@ export default function Confidentialite() {
             <section className="space-y-3">
               <h2 className="text-xl font-semibold">Cookies</h2>
               <p className="text-muted-foreground">
-                Flore n&apos;utilise pas de cookies publicitaires. Seuls des cookies
+                Floria n&apos;utilise pas de cookies publicitaires. Seuls des cookies
                 techniques peuvent être nécessaires au bon fonctionnement du
                 site.
               </p>
@@ -60,7 +60,7 @@ export default function Confidentialite() {
               <h2 className="text-xl font-semibold">Vos droits</h2>
               <p className="text-muted-foreground">
                 Vous pouvez demander l&apos;accès, la rectification ou la suppression
-                de vos informations en nous contactant à contact@flore.app.
+                de vos informations en nous contactant à contact@floria.app.
               </p>
             </section>
           </div>
