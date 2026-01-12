@@ -62,9 +62,15 @@ export default function Chat() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: text,
-        session_id: "1234", // tu peux le rendre dynamique si besoin
+        messages: [
+          ...messages, {
+            role: "user",
+            content: text,
+          },
+        ],
+        session_id: "1234",
       }),
+
     });
 
     const data = await response.json();
