@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from mcp.server import execute_tool, get_tools
 from mcp.schemas import ToolRequest, ToolResponse
+from agent.orchestrator import handle_message
 
 app = FastAPI(title="Backend MCP Connector")
 
@@ -46,6 +47,24 @@ def run_tool(request: ToolRequest):
             message=str(e)
         )
 
+@app.post("/chat")
+def chat_endpoint(payload: dict):
+    """
+    Endpoint pour le front.
+    Attends JSON :
+    {
+        "message": "...",
+        "session_id": "..."
+    }
+    """
+    message = payload.get("message")
+    session_id = payload.get("session_id")
+
+    if not message or not session_id:
+        raise HTTPException(status_code=400, detail="message and session_id required")
+
+    # Appel de l'orchestrator
+    return handle_message(message, session_id)
 
 # 🧠 À quoi sert ce fichier ?
 # Sert de pont entre le frontend et le MCP
