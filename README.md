@@ -169,7 +169,7 @@ Tester le scraping
 POST http://127.0.0.1:8000/execute
 
 {
-  "tool": "scrape_plants",
+  "tool": "fetch_plant_sources",
   "arguments": {
     "site": "https://www.conservation-nature.fr/plantes/",
     "limit": 3

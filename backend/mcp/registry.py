@@ -1,11 +1,11 @@
 # mcp/registry.py
 
 # Import des tools existants
-from tools.scraping import scrape_plants
+from tools.scraping import fetch_plant_sources
 
 # Registry : nom du tool → fonction Python
 TOOLS = {
-    "scrape_plants": scrape_plants,
+    "fetch_plant_sources": fetch_plant_sources,
     # Ajouter ici d'autres tools si besoin
 }
 
@@ -24,4 +24,4 @@ def list_tools():
 # Le MCP va s’y référer pour savoir ce qu’il peut exécuter
 
 # Concrètement :
-# Si l’IA demande "scrape_plants", le MCP regarde dans ce registre, trouve la fonction scrape_plants et l’exécute.
+# Si l’IA demande "fetch_plant_sources", le MCP regarde dans ce registre, trouve la fonction fetch_plant_sources et l’exécute.
