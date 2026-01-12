@@ -65,13 +65,13 @@ Pré-requis Ollama (optionnel)
 # ============================================================================
 
 # MCP
-MCP_URL = os.getenv("MCP_URL", "http://localhost:9000")
+MCP_URL = os.getenv("MCP_URL", "http://localhost:9001")
 MCP_EXECUTE_ENDPOINT = os.getenv("MCP_EXECUTE_ENDPOINT", "/execute")
 MCP_TIMEOUT = int(os.getenv("MCP_TIMEOUT", "30"))
 
 # OLLAMA
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "60"))
 
 
