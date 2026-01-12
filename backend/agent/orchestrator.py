@@ -5,10 +5,13 @@ import re
 import requests
 from typing import Optional, Dict, Any, List
 
+# Mémoire simple en RAM (MVP)
+CHAT_MEMORY: Dict[str, List[Dict[str, str]]] = {}
+
 """
 But
 ---
-Orchestrator = "chef d’orchestre" entre :
+Orchestrator = "chef d'orchestre" entre :
 
 1) Backend principal (/chat)
    → reçoit la question utilisateur
@@ -29,35 +32,6 @@ handle_message(...) retourne toujours :
   "tools_used": [str],
   "sources": [{"title": "...", "url": "..."}]
 }
-
-
-Pré-requis MCP
---------------
-- Un MCP FastAPI exposant POST /execute
-- Un tool enregistré dans le registry :
-    "fetch_plant_sources"
-
-  acceptant :
-    {
-      "query": "",
-      "limit": int
-    }
-
-  et retournant :
-    {
-      "query": "...",
-      "summary": "...",
-      "sources": [
-        {"title": "...", "url": "...", "source_name": "..."},
-        ...
-      ]
-    }
-
-
-Pré-requis Ollama (optionnel)
------------------------------
-- Ollama lancé en local (par défaut port 11434)
-- Modèle disponible (mistral, llama3.x, etc.)
 """
 
 # ============================================================================
@@ -70,7 +44,7 @@ MCP_EXECUTE_ENDPOINT = os.getenv("MCP_EXECUTE_ENDPOINT", "/execute")
 MCP_TIMEOUT = int(os.getenv("MCP_TIMEOUT", "30"))
 
 # OLLAMA
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/chat")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "60"))
 
@@ -82,19 +56,6 @@ OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "60"))
 def _mcp_execute(tool: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
     """
     Appel MCP via HTTP POST /execute
-
-    Payload envoyé :
-      {
-        "tool": "",
-        "arguments": {...}
-      }
-
-    Réponse attendue :
-      {
-        "status": "success",
-        "tool": "...",
-        "result": ...
-      }
     """
     url = f"{MCP_URL}{MCP_EXECUTE_ENDPOINT}"
     payload = {"tool": tool, "arguments": arguments}
@@ -111,14 +72,13 @@ def _mcp_execute(tool: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
 # OLLAMA CALL (LLM)
 # ============================================================================
 
-def _call_ollama(prompt: str, model: str = OLLAMA_MODEL) -> str:
+def _call_ollama(messages: List[Dict[str, str]], model: str = OLLAMA_MODEL) -> str:
     """
-    Appel Ollama local.
-    Lève une exception si Ollama n’est pas accessible.
+    Appel Ollama local avec historique de conversation.
     """
     payload = {
         "model": model,
-        "prompt": prompt,
+        "messages": messages,
         "stream": False
     }
 
@@ -126,19 +86,19 @@ def _call_ollama(prompt: str, model: str = OLLAMA_MODEL) -> str:
     r.raise_for_status()
 
     data = r.json()
-    return (data.get("response") or "").strip()
+    return (data.get("message", {}).get("content") or "").strip()
 
 
 def _fallback_reply(message: str, tool_context: Optional[str] = None) -> str:
     """
-    Réponse fallback (MVP) si Ollama n’est pas prêt ou en erreur.
+    Réponse fallback (MVP) si Ollama n'est pas prêt ou en erreur.
     """
     base = (
         "Je suis Floria (mode MVP sans modèle).\n\n"
-        "Pour t’aider au mieux, peux-tu préciser :\n"
+        "Pour t'aider au mieux, peux-tu préciser :\n"
         "1) Quelle plante exactement ?\n"
         "2) Exposition (lumière directe / indirecte) ?\n"
-        "3) Fréquence d’arrosage ?\n"
+        "3) Fréquence d'arrosage ?\n"
         "4) Symptômes visibles (jaunissement, taches, feuilles molles) ?\n\n"
         f"Tu as demandé : {message}\n"
     )
@@ -198,41 +158,12 @@ def _extract_plant(message: str) -> Optional[str]:
 
 
 # ============================================================================
-# PROMPT BUILDER
-# ============================================================================
-
-def _build_prompt(message: str, intent: str, tool_context: Optional[str]) -> str:
-    """
-    Prompt cadré (style Floria).
-    """
-    system = (
-        "Tu es Floria, assistant expert pour l’entretien des plantes.\n"
-        "Ton : concis, posé, orienté solution.\n\n"
-        "Format obligatoire :\n"
-        "- Réponse courte (2-5 lignes)\n"
-        "- Plan d’action priorisé (1/2/3)\n"
-        "- Questions ciblées si infos manquantes\n\n"
-        "Sécurité :\n"
-        "- N’invente pas de sources\n"
-        "- Indique 'probable' si incertain\n"
-        "- Aucun conseil dangereux\n"
-    )
-
-    context = (
-        f"\nContexte (extraits de sources autorisées):\n{tool_context}\n"
-        if tool_context else ""
-    )
-
-    return f"{system}\nIntent: {intent}\n\nQuestion utilisateur:\n{message}\n{context}"
-
-
-# ============================================================================
 # MAIN ENTRYPOINT (appelé par /chat)
 # ============================================================================
 
 def handle_message(message: str, session_id: str) -> Dict[str, Any]:
     """
-    Point d’entrée principal de l’orchestrator.
+    Point d'entrée principal de l'orchestrator avec gestion de l'historique.
     """
     intent = _detect_intent(message)
     plant = _extract_plant(message)
@@ -270,15 +201,61 @@ def handle_message(message: str, session_id: str) -> Dict[str, Any]:
             tools_used.append("fetch_plant_sources_failed")
 
     # ------------------------------------------------------------------------
-    # 2) LLM ou fallback
+    # 2) Gestion de l'historique de conversation
     # ------------------------------------------------------------------------
-    prompt = _build_prompt(message, intent, tool_context)
+    
+    # Initialisation mémoire session si première fois
+    if session_id not in CHAT_MEMORY:
+        CHAT_MEMORY[session_id] = [
+            {
+                "role": "system",
+                "content": (
+                    "Tu es Floria, assistante experte en entretien des plantes. "
+                    "Réponds de façon naturelle, cohérente avec l'historique. "
+                    "Évite de reposer des questions déjà répondues. "
+                    "Ton : concis, posé, orienté solution."
+                )
+            }
+        ]
 
+    # Injection du contexte MCP si disponible (avant le message user)
+    if tool_context:
+        CHAT_MEMORY[session_id].append({
+            "role": "system",
+            "content": f"Contexte fiable (sources vérifiées) : {tool_context}"
+        })
+
+    # Ajout du message utilisateur
+    CHAT_MEMORY[session_id].append({
+        "role": "user",
+        "content": message
+    })
+
+    # ------------------------------------------------------------------------
+    # 3) Appel LLM avec historique ou fallback
+    # ------------------------------------------------------------------------
     try:
-        reply = _call_ollama(prompt) or _fallback_reply(message, tool_context)
-    except Exception:
+        reply = _call_ollama(CHAT_MEMORY[session_id])
+        
+        # Sauvegarde de la réponse dans l'historique
+        CHAT_MEMORY[session_id].append({
+            "role": "assistant",
+            "content": reply
+        })
+        
+    except Exception as e:
+        # En cas d'erreur Ollama, utiliser le fallback
         reply = _fallback_reply(message, tool_context)
+        
+        # Sauvegarder quand même le fallback dans l'historique
+        CHAT_MEMORY[session_id].append({
+            "role": "assistant",
+            "content": reply
+        })
 
+    # ------------------------------------------------------------------------
+    # 4) Retour du contrat attendu
+    # ------------------------------------------------------------------------
     return {
         "reply": reply,
         "tools_used": tools_used,
