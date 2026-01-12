@@ -43,4 +43,4 @@ def get_tools():
 # Il exécute le tool et retourne le résultat
 # Permet à l’IA de ne pas toucher au scraping directement
 
-# Concrètement : l’IA dit "scrape_plants", le MCP s’assure que ce tool existe, l’exécute et renvoie le résultat.
+# Concrètement : l’IA dit "fetch_plant_sources", le MCP s’assure que ce tool existe, l’exécute et renvoie le résultat.

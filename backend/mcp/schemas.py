@@ -26,7 +26,7 @@ class ToolResponse(BaseModel):
 # Exemple JSON envoyé par l’IA :
 
 # {
-#   "tool": "scrape_plants",
+#   "tool": "fetch_plant_sources",
 #   "arguments": {
 #     "site": "https://www.conservation-nature.fr/plantes/",
 #     "limit": 3
@@ -38,7 +38,7 @@ class ToolResponse(BaseModel):
 
 # {
 #   "status": "success",
-#   "tool": "scrape_plants",
+#   "tool": "fetch_plant_sources",
 #   "result": [
 #     {"title": "Plante 1", "url": "...", "content": "..."},
 #     {"title": "Plante 2", "url": "...", "content": "..."}
