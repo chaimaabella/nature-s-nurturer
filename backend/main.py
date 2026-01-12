@@ -68,7 +68,7 @@ def chat_endpoint(payload: dict):
 
 # 🧠 À quoi sert ce fichier ?
 # Sert de pont entre le frontend et le MCP
-# Reçoit les requêtes de l’utilisateur (via le front)
+# Reçoit les requêtes lode l’utilisateur (via le front)
 # Transmet ces requêtes au MCP pour exécution des tools
 # Retourne le résultat à l’utilisateur
 

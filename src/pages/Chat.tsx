@@ -43,55 +43,54 @@ export default function Chat() {
   }, []);
 
   const handleSend = async (messageText?: string) => {
-    const text = messageText || input.trim();
-    if (!text || isLoading) return;
+  const text = messageText || input.trim();
+  if (!text || isLoading) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: text,
+  const userMessage: Message = {
+    id: Date.now().toString(),
+    role: "user",
+    content: text,
+  };
+
+  setMessages((prev) => [...prev, userMessage]);
+  setInput("");
+  setIsLoading(true);
+
+  try {
+    // Appel au backend /chat
+    const response = await fetch("http://localhost:8000/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        session_id: "1234", // tu peux le rendre dynamique si besoin
+      }),
+    });
+
+    const data = await response.json();
+
+    // On récupère la réponse envoyée par l'orchestrator
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: data.reply,
     };
 
-    addMessage(userMessage);
-    setInput("");
-    setIsLoading(true);
-    const conversationId = conversationIdRef.current;
+    setMessages((prev) => [...prev, assistantMessage]);
+  } catch (err) {
+    console.error("Erreur backend:", err);
 
-    try {
-      const payload = await sendChatMessage({ message: text, sessionId });
-      if (conversationIdRef.current !== conversationId) {
-        return;
-      }
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: "Désolé, le backend n'a pas répondu. Réessayez plus tard.",
+    };
 
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: formatChatReply(payload),
-      };
-      addMessage(assistantMessage);
-    } catch {
-      if (conversationIdRef.current !== conversationId) {
-        return;
-      }
-      addMessage({
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Désolé, je n'arrive pas à joindre le serveur pour le moment. Réessayez dans un instant.",
-      });
-    } finally {
-      if (conversationIdRef.current === conversationId) {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const handleReset = () => {
-    conversationIdRef.current += 1;
-    resetMessages();
-    resetSession();
-    setInput("");
+    setMessages((prev) => [...prev, assistantMessage]);
+  } finally {
     setIsLoading(false);
-  };
+  }
+};
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
