@@ -98,7 +98,7 @@ def fetch_plant_sources(query: str, limit: int = 2) -> Dict:
 # 📌 L’IA :
 # ne scrape pas
 # ne connaît pas le HTML
-# demande simplement : “Utilise le tool scrape_plants”
+# demande simplement : “Utilise le tool fetch_plant_sources”
 
 # 📌 Le tool :
 # exécute
