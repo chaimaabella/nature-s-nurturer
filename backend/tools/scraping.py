@@ -5,66 +5,84 @@ from bs4 import BeautifulSoup
 from typing import List, Dict
 
 
-def scrape_plants(site: str, limit: int = 5) -> List[Dict[str, str]]:
+# ============================================================================
+# SOURCES AUTORISÉES
+# ============================================================================
+
+SOURCES = [
+    {
+        "name": "Conservation Nature",
+        "base_url": "https://www.conservation-nature.fr/plantes/"
+    },
+    {
+        "name": "Nature & Jardin",
+        "base_url": "http://nature.jardin.free.fr"
+    }
+]
+
+
+# ============================================================================
+# TOOL MCP : fetch_plant_sources
+# ============================================================================
+
+def fetch_plant_sources(query: str, limit: int = 2) -> Dict:
     """
-    Tool MCP : scrape des pages de plantes depuis un site statique.
+    Tool MCP : récupère des informations botaniques fiables
+    à partir de sites spécialisés, à partir d’un nom de plante.
 
     Args:
-        site (str): URL du site à scraper
-        limit (int): nombre maximum de pages/plantes à récupérer
+        query (str): nom de la plante (ex: "monstera")
+        limit (int): nombre maximum de sources à retourner
 
     Returns:
-        List[Dict]: liste de plantes avec titre + description
+        Dict contenant :
+        - query
+        - summary (texte résumé)
+        - sources (liste de liens)
     """
 
-    response = requests.get(site, timeout=10)
-    response.raise_for_status()
-
-    soup = BeautifulSoup(response.text, "html.parser")
-
     results = []
+    summaries = []
 
-    # On récupère les liens présents sur la page
-    links = soup.find_all("a", href=True)
-
-    for link in links:
+    for source in SOURCES:
         if len(results) >= limit:
             break
 
-        href = link["href"]
-        title = link.get_text(strip=True)
+        # Construction de l’URL à partir de la plante
+        url = source["base_url"] + query
 
-        # On ignore les liens vides ou trop courts
-        if not title or len(title) < 3:
-            continue
-
-        # Gestion des liens relatifs
-        if href.startswith("/"):
-            href = site.rstrip("/") + href
-
-        # On tente de scraper la page liée
         try:
-            page = requests.get(href, timeout=10)
-            page.raise_for_status()
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
 
-            page_soup = BeautifulSoup(page.text, "html.parser")
-            text = page_soup.get_text(separator=" ", strip=True)
+            soup = BeautifulSoup(response.text, "html.parser")
 
-            # On limite la taille du texte pour l’IA
+            # Extraction simple du texte de la page
+            text = soup.get_text(separator=" ", strip=True)
+
+            # On limite la taille pour l’IA
             text = text[:1500]
 
+            summaries.append(text)
+
             results.append({
-                "title": title,
-                "url": href,
-                "content": text
+                "title": source["name"],
+                "url": url,
+                "source_name": source["name"]
             })
 
         except Exception:
-            # Si une page échoue, on continue
+            # Si un site échoue, on continue avec les autres
             continue
 
-    return results
+    # Résumé simple (MVP) : concaténation des extraits
+    summary = "\n\n".join(summaries) if summaries else None
 
+    return {
+        "query": query,
+        "summary": summary,
+        "sources": results
+    }
 
 # 🧠 À quoi sert tools/scraping.py ?
 
