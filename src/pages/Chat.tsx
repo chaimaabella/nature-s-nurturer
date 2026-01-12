@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Send, Leaf, ArrowLeft, Sparkles } from "lucide-react";
-import { Header } from "@/components/Header";
+import { Send, ArrowLeft, Sparkles, RefreshCw } from "lucide-react";
+import { markdownToHtml } from "@/lib/markdown";
+import logoImage from "@/assets/logo-nature.png";
+import { useChatHistory, type ChatMessage } from "@/hooks/use-chat-history";
+import { useChatSession } from "@/hooks/use-chat-session";
+import { formatChatReply, sendChatMessage } from "@/lib/chat-api";
 
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
+type Message = ChatMessage;
 
 const suggestedQuestions = [
   "Pourquoi les feuilles de mon monstera jaunissent-elles ?",
@@ -20,9 +20,11 @@ const suggestedQuestions = [
 export default function Chat() {
   const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
+  const { sessionId, resetSession } = useChatSession();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const conversationIdRef = useRef(0);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -101,13 +103,26 @@ export default function Chat() {
           </Link>
           
           <div className="flex-1 flex items-center justify-center gap-2">
-            <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
-              <Leaf className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="font-display text-xl font-semibold text-foreground">Flore</span>
+            <img
+              src={logoImage}
+              alt="Floria"
+              className="h-9 w-9 rounded-lg object-cover"
+            />
+            <span className="font-display text-xl font-semibold text-foreground">Floria</span>
           </div>
-          
-          <div className="w-20" /> {/* Spacer for centering */}
+
+          <div className="flex w-20 justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              //onClick={handleReset}
+              disabled={messages.length === 0 && !isLoading}
+              aria-label="Nouvelle conversation"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -122,7 +137,7 @@ export default function Chat() {
                   <Sparkles className="h-10 w-10 text-primary" />
                 </div>
                 <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">
-                  Bienvenue sur Flore
+                  Bienvenue sur Floria
                 </h1>
                 <p className="text-muted-foreground max-w-md mb-8">
                   Posez-moi vos questions sur l'entretien de vos plantes. Je suis là pour vous aider !
@@ -154,9 +169,16 @@ export default function Chat() {
                           : "bg-card border border-border text-foreground rounded-bl-md"
                       }`}
                     >
-                      <div className="text-sm md:text-base whitespace-pre-line">
-                        {message.content}
-                      </div>
+                      {message.role === "assistant" ? (
+                        <div
+                          className="text-sm md:text-base leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: markdownToHtml(message.content) }}
+                        />
+                      ) : (
+                        <div className="text-sm md:text-base whitespace-pre-line">
+                          {message.content}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

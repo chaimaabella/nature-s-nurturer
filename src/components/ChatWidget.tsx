@@ -1,27 +1,30 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, X, Send, Leaf, ArrowUpRight } from "lucide-react";
+import { MessageCircle, X, Send, RefreshCw } from "lucide-react";
+import logoImage from "@/assets/logo-nature.png";
+import { markdownToHtml } from "@/lib/markdown";
+import { useChatHistory, type ChatMessage } from "@/hooks/use-chat-history";
+import { useChatSession } from "@/hooks/use-chat-session";
+import { formatChatReply, sendChatMessage } from "@/lib/chat-api";
 
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
+type Message = ChatMessage;
 
 const initialMessages: Message[] = [
   {
     id: "welcome",
     role: "assistant",
-    content: "Bonjour ! 🌿 Je suis Flore, votre assistant botanique. Comment puis-je vous aider avec vos plantes aujourd'hui ?",
+    content: "Bonjour ! 🌿 Je suis Floria, votre assistant botanique. Comment puis-je vous aider avec vos plantes aujourd'hui ?",
   },
 ];
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const { messages, addMessage, resetMessages } = useChatHistory();
+  const { sessionId, resetSession } = useChatSession();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const conversationIdRef = useRef(0);
+  const displayMessages = messages.length > 0 ? [initialMessages[0], ...messages] : initialMessages;
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -32,20 +35,44 @@ export function ChatWidget() {
       content: input.trim(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    addMessage(userMessage);
     setInput("");
     setIsLoading(true);
+    const conversationId = conversationIdRef.current;
 
-    // Simulate AI response (will be replaced with actual API)
-    setTimeout(() => {
+    try {
+      const payload = await sendChatMessage({ message: input.trim(), sessionId });
+      if (conversationIdRef.current !== conversationId) {
+        return;
+      }
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "Je comprends votre question ! Pour une réponse complète et personnalisée, je vous invite à utiliser notre assistant complet. Cliquez sur le bouton ci-dessous pour accéder à toutes les fonctionnalités.",
+        content: formatChatReply(payload),
       };
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, 1000);
+      addMessage(assistantMessage);
+    } catch {
+      if (conversationIdRef.current !== conversationId) {
+        return;
+      }
+      addMessage({
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Désolé, je n'arrive pas à joindre le serveur pour le moment. Réessayez dans un instant.",
+      });
+    } finally {
+      if (conversationIdRef.current === conversationId) {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleReset = () => {
+    conversationIdRef.current += 1;
+    resetMessages();
+    resetSession();
+    setInput("");
+    setIsLoading(false);
   };
 
   return (
@@ -70,25 +97,28 @@ export function ChatWidget() {
           <div className="p-4 border-b border-border bg-primary/5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
-                  <Leaf className="h-5 w-5 text-primary-foreground" />
-                </div>
+                <img src={logoImage} alt="Floria" className="h-10 w-10 rounded-full object-cover" />
                 <div>
-                  <h3 className="font-display font-semibold text-foreground">Flore</h3>
+                  <h3 className="font-display font-semibold text-foreground">Floria</h3>
                   <p className="text-xs text-muted-foreground">Assistant botanique</p>
                 </div>
               </div>
-              <Link to="/chat">
-                <Button variant="ghost" size="sm" className="text-xs">
-                  Ouvrir <ArrowUpRight className="h-3 w-3 ml-1" />
-                </Button>
-              </Link>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleReset}
+                aria-label="Nouvelle conversation"
+                disabled={messages.length === 0 && !isLoading}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
           {/* Messages */}
           <div className="h-72 overflow-y-auto p-4 space-y-4">
-            {messages.map((message) => (
+            {displayMessages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
@@ -100,7 +130,14 @@ export function ChatWidget() {
                       : "bg-muted text-foreground rounded-bl-md"
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
+                  {message.role === "assistant" ? (
+                    <div
+                      className="text-sm leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: markdownToHtml(message.content) }}
+                    />
+                  ) : (
+                    <p className="text-sm whitespace-pre-line">{message.content}</p>
+                  )}
                 </div>
               </div>
             ))}
