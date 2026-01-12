@@ -5,6 +5,8 @@ import { Send, ArrowLeft, Sparkles, RefreshCw } from "lucide-react";
 import { markdownToHtml } from "@/lib/markdown";
 import logoImage from "@/assets/logo-nature.png";
 import { useChatHistory, type ChatMessage } from "@/hooks/use-chat-history";
+import { useChatSession } from "@/hooks/use-chat-session";
+import { formatChatReply, sendChatMessage } from "@/lib/chat-api";
 
 type Message = ChatMessage;
 
@@ -18,6 +20,7 @@ const suggestedQuestions = [
 export default function Chat() {
   const [searchParams] = useSearchParams();
   const { messages, addMessage, resetMessages } = useChatHistory();
+  const { sessionId, resetSession } = useChatSession();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -54,41 +57,38 @@ export default function Chat() {
     setIsLoading(true);
     const conversationId = conversationIdRef.current;
 
-    // Simulate AI response (will be replaced with actual API)
-    setTimeout(() => {
+    try {
+      const payload = await sendChatMessage({ message: text, sessionId });
       if (conversationIdRef.current !== conversationId) {
         return;
-      }
-      const responses: Record<string, string> = {
-        "monstera": "Les feuilles jaunes sur un Monstera peuvent être causées par plusieurs facteurs :\n\n**Arrosage excessif** - C'est la cause la plus fréquente. Vérifiez que le sol sèche entre les arrosages.\n\n**Manque de lumière** - Le Monstera a besoin de lumière indirecte brillante.\n\n**Carence en nutriments** - Un engrais équilibré tous les mois pendant la période de croissance peut aider.\n\n**Plan d'action :**\n1. Vérifiez l'humidité du sol avant d'arroser\n2. Placez la plante près d'une fenêtre lumineuse\n3. Envisagez un rempotage si le sol reste détrempé",
-        "pothos": "Le bouturage du Pothos est très simple :\n\n**Étapes :**\n1. Coupez une tige avec au moins 4-5 feuilles, juste en dessous d'un nœud\n2. Retirez les 1-2 feuilles du bas\n3. Placez la bouture dans l'eau claire\n4. Changez l'eau tous les 3-4 jours\n5. Attendez que les racines fassent 5-10 cm (2-4 semaines)\n6. Plantez dans un terreau bien drainant\n\n**Conseils :**\n- Utilisez un récipient transparent pour surveiller les racines\n- Évitez le soleil direct sur les boutures",
-        "taches": "Les taches brunes peuvent indiquer plusieurs problèmes :\n\n**Causes possibles :**\n- **Coup de soleil** - Déplacez la plante loin du soleil direct\n- **Excès d'eau** - Laissez sécher le sol entre les arrosages\n- **Maladie fongique** - Améliorez la circulation d'air\n- **Eau calcaire** - Utilisez de l'eau filtrée ou de pluie\n\n**Que faire :**\n1. Retirez les feuilles très abîmées\n2. Ajustez l'arrosage\n3. Vérifiez le drainage du pot\n4. Observez pendant une semaine",
-        "cactus": "**Fréquence d'arrosage pour un cactus :**\n\n**Été (croissance active) :**\n- Arrosez quand le sol est complètement sec (environ tous les 7-14 jours)\n\n**Hiver (repos) :**\n- Réduisez drastiquement (1 fois par mois ou moins)\n\n**Méthode :**\n1. Insérez votre doigt à 2-3 cm dans le sol\n2. S'il est sec, arrosez abondamment\n3. Videz la soucoupe après 30 minutes\n\n**Important :** Mieux vaut sous-arroser que trop arroser. Les cactus stockent l'eau et tolèrent la sécheresse.",
-      };
-
-      let responseContent = "Je comprends votre question sur les plantes ! 🌱\n\nPour vous donner les meilleurs conseils, voici quelques points généraux :\n\n1. **Observez votre plante** - Les signes visuels (couleur des feuilles, texture du sol) sont essentiels.\n\n2. **Vérifiez les bases** - Lumière, eau, température et humidité sont les piliers.\n\n3. **Soyez patient** - Les plantes prennent du temps à réagir aux changements.\n\nN'hésitez pas à me poser des questions plus spécifiques !";
-
-      // Check for keyword matches
-      for (const [keyword, response] of Object.entries(responses)) {
-        if (text.toLowerCase().includes(keyword)) {
-          responseContent = response;
-          break;
-        }
       }
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: responseContent,
+        content: formatChatReply(payload),
       };
       addMessage(assistantMessage);
-      setIsLoading(false);
-    }, 1500);
+    } catch {
+      if (conversationIdRef.current !== conversationId) {
+        return;
+      }
+      addMessage({
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Désolé, je n'arrive pas à joindre le serveur pour le moment. Réessayez dans un instant.",
+      });
+    } finally {
+      if (conversationIdRef.current === conversationId) {
+        setIsLoading(false);
+      }
+    }
   };
 
   const handleReset = () => {
     conversationIdRef.current += 1;
     resetMessages();
+    resetSession();
     setInput("");
     setIsLoading(false);
   };

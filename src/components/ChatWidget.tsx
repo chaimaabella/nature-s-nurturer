@@ -4,6 +4,8 @@ import { MessageCircle, X, Send, RefreshCw } from "lucide-react";
 import logoImage from "@/assets/logo-nature.png";
 import { markdownToHtml } from "@/lib/markdown";
 import { useChatHistory, type ChatMessage } from "@/hooks/use-chat-history";
+import { useChatSession } from "@/hooks/use-chat-session";
+import { formatChatReply, sendChatMessage } from "@/lib/chat-api";
 
 type Message = ChatMessage;
 
@@ -18,6 +20,7 @@ const initialMessages: Message[] = [
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const { messages, addMessage, resetMessages } = useChatHistory();
+  const { sessionId, resetSession } = useChatSession();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const conversationIdRef = useRef(0);
@@ -37,24 +40,37 @@ export function ChatWidget() {
     setIsLoading(true);
     const conversationId = conversationIdRef.current;
 
-    // Simulate AI response (will be replaced with actual API)
-    setTimeout(() => {
+    try {
+      const payload = await sendChatMessage({ message: input.trim(), sessionId });
       if (conversationIdRef.current !== conversationId) {
         return;
       }
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "Je comprends votre question ! Pour une réponse complète et personnalisée, je vous invite à utiliser notre assistant complet. Cliquez sur le bouton ci-dessous pour accéder à toutes les fonctionnalités.",
+        content: formatChatReply(payload),
       };
       addMessage(assistantMessage);
-      setIsLoading(false);
-    }, 1000);
+    } catch {
+      if (conversationIdRef.current !== conversationId) {
+        return;
+      }
+      addMessage({
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Désolé, je n'arrive pas à joindre le serveur pour le moment. Réessayez dans un instant.",
+      });
+    } finally {
+      if (conversationIdRef.current === conversationId) {
+        setIsLoading(false);
+      }
+    }
   };
 
   const handleReset = () => {
     conversationIdRef.current += 1;
     resetMessages();
+    resetSession();
     setInput("");
     setIsLoading(false);
   };
