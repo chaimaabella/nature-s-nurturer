@@ -25,7 +25,7 @@ interface AboutSectionProps {
 
 export function AboutSection({
   title = "Notre mission",
-  description = "Floria est né d'une passion simple : rendre le soin des plantes accessible à tous. Notre assistant IA combine les dernières avancées en intelligence artificielle avec des connaissances botaniques approfondies pour vous accompagner dans votre aventure végétale.",
+  description = "Au fil des fleurs est né d'une passion simple : rendre le soin des plantes accessible à tous. Notre assistant IA combine les dernières avancées en intelligence artificielle avec des connaissances botaniques approfondies pour vous accompagner dans votre aventure végétale.",
 }: AboutSectionProps) {
   return (
     <section id="about" className="py-20 md:py-28 bg-accent/30">

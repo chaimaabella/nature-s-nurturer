@@ -106,10 +106,10 @@ export default function Chat() {
           <div className="flex-1 flex items-center justify-center gap-2">
             <img
               src={logoImage}
-              alt="Floria"
+              alt="FlorIA"
               className="h-9 w-9 rounded-lg object-cover"
             />
-            <span className="font-display text-xl font-semibold text-foreground">Floria</span>
+            <span className="font-display text-xl font-semibold text-foreground">FlorIA</span>
           </div>
 
           <div className="flex w-20 justify-end">
@@ -138,7 +138,7 @@ export default function Chat() {
                   <Sparkles className="h-10 w-10 text-primary" />
                 </div>
                 <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">
-                  Bienvenue sur Floria
+                  Bienvenue sur FlorIA
                 </h1>
                 <p className="text-muted-foreground max-w-md mb-8">
                   Posez-moi vos questions sur l'entretien de vos plantes. Je suis là pour vous aider !

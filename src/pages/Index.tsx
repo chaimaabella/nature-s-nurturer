@@ -10,7 +10,7 @@ import { ChatWidget } from "@/components/ChatWidget";
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <Header brandName="Au fil des fleurs" />
       
       <main className="flex-1">
         <HeroSection />
@@ -20,7 +20,7 @@ const Index = () => {
         <AboutSection />
       </main>
 
-      <Footer />
+      <Footer brandName="Au fil des fleurs" />
       <ChatWidget />
     </div>
   );
