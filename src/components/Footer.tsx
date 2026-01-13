@@ -2,16 +2,20 @@ import { Link } from "react-router-dom";
 import { Mail, Instagram } from "lucide-react";
 import logoImage from "@/assets/logo-nature.png";
 
-export function Footer() {
+interface FooterProps {
+  brandName?: string;
+}
+
+export function Footer({ brandName = "Floria" }: FooterProps) {
   return (
     <footer id="contact" className="border-t border-border bg-card">
       <div className="container py-10 md:py-12">
         <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2">
-              <img src={logoImage} alt="Floria" className="h-9 w-9 object-cover rounded-lg" />
+              <img src={logoImage} alt={brandName} className="h-9 w-9 object-cover rounded-lg" />
               <span className="font-display text-xl font-semibold text-foreground">
-                Floria
+                {brandName}
               </span>
             </Link>
             <p className="text-muted-foreground max-w-md">
@@ -52,7 +56,7 @@ export function Footer() {
 
         <div className="mt-10 pt-6 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2026 Floria. Tous droits réservés.
+            © 2026 {brandName}. Tous droits réservés.
           </p>
           <div className="flex gap-6">
             <Link

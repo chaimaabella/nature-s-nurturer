@@ -18,7 +18,7 @@ interface ExamplesSectionProps {
 
 export function ExamplesSection({
   title = "Exemples de questions",
-  subtitle = "Voici quelques exemples de ce que vous pouvez demander à Floria",
+  subtitle = "Voici quelques exemples de ce que vous pouvez demander à Au fil des fleurs",
 }: ExamplesSectionProps) {
   return (
     <section className="py-20 md:py-28 bg-background">

@@ -11,7 +11,11 @@ const navLinks = [
   { label: "Contact", href: "/#contact" },
 ];
 
-export function Header() {
+interface HeaderProps {
+  brandName?: string;
+}
+
+export function Header({ brandName = "Floria" }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -31,9 +35,9 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
-          <img src={logoImage} alt="Floria" className="h-9 w-9 object-cover rounded-lg transition-transform group-hover:scale-105" />
+          <img src={logoImage} alt={brandName} className="h-9 w-9 object-cover rounded-lg transition-transform group-hover:scale-105" />
           <span className="font-display text-xl font-semibold text-foreground">
-            Floria
+            {brandName}
           </span>
         </Link>
 
