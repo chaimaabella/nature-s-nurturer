@@ -374,7 +374,6 @@ def handle_message(message: str, session_id: str) -> Dict[str, Any]:
         "sources": sources
     }
 
-
 # import os
 # import re
 # import requests
