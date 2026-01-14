@@ -19,12 +19,17 @@ const suggestedQuestions = [
 
 export default function Chat() {
   const [searchParams] = useSearchParams();
-  const { messages, addMessage, resetMessages } = useChatHistory();
+  const { messages, setMessages, addMessage, resetMessages } = useChatHistory();
   const { sessionId, resetSession } = useChatSession();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const conversationIdRef = useRef(0);
+
+  const handleReset = () => {
+    resetMessages();
+    resetSession();
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -62,15 +67,9 @@ export default function Chat() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        messages: [
-          ...messages, {
-            role: "user",
-            content: text,
-          },
-        ],
-        session_id: "1234",
+        message: text,
+        session_id: sessionId,
       }),
-
     });
 
     const data = await response.json();
@@ -79,7 +78,7 @@ export default function Chat() {
     const assistantMessage: Message = {
       id: (Date.now() + 1).toString(),
       role: "assistant",
-      content: data.reply,
+      content: data.reply || "Désolé, je n'ai pas pu générer de réponse.",
     };
 
     setMessages((prev) => [...prev, assistantMessage]);
