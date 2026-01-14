@@ -12,6 +12,7 @@ const formatInlineMarkdown = (value: string) =>
     .replace(/\*(.+?)\*/g, '<em class="italic">$1</em>');
 
 export const markdownToHtml = (markdown: string) => {
+  if (!markdown) return "";
   const escaped = escapeHtml(markdown);
   const lines = escaped.split("\n");
   const blocks: string[] = [];
