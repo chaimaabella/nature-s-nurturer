@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Mail, Instagram } from "lucide-react";
-import logoImage from "@/assets/logo-nature.png";
+import logoImage from "@/assets/logo-floria.svg";
 
 interface FooterProps {
   brandName?: string;

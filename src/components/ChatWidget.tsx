@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, X, Send, RefreshCw } from "lucide-react";
-import logoImage from "@/assets/logo-nature.png";
+import logoImage from "@/assets/logo-floria.svg";
 import { markdownToHtml } from "@/lib/markdown";
 import { useChatHistory, type ChatMessage } from "@/hooks/use-chat-history";
 import { useChatSession } from "@/hooks/use-chat-session";
