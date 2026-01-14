@@ -6,7 +6,8 @@ import { markdownToHtml } from "@/lib/markdown";
 import logoImage from "@/assets/logo-floria.svg";
 import { useChatHistory, type ChatMessage } from "@/hooks/use-chat-history";
 import { useChatSession } from "@/hooks/use-chat-session";
-import { formatChatReply, sendChatMessage } from "@/lib/chat-api";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 type Message = ChatMessage;
 
@@ -19,12 +20,11 @@ const suggestedQuestions = [
 
 export default function Chat() {
   const [searchParams] = useSearchParams();
-  const { messages, setMessages, addMessage, resetMessages } = useChatHistory();
+  const { messages, setMessages, resetMessages } = useChatHistory();
   const { sessionId, resetSession } = useChatSession();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const conversationIdRef = useRef(0);
 
   const handleReset = () => {
     resetMessages();
@@ -63,7 +63,7 @@ export default function Chat() {
 
   try {
     // Appel au backend /chat
-    const response = await fetch("http://localhost:8000/chat", {
+    const response = await fetch(`${API_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
