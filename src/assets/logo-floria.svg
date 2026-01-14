@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="FlorIA logo">
+  <rect width="512" height="512" fill="#ffffff" />
+  <g>
+    <g fill="#e87698" stroke="#b4506e" stroke-width="6">
+      <ellipse cx="256" cy="110" rx="90" ry="140" transform="rotate(0 256 256)" />
+      <ellipse cx="256" cy="110" rx="90" ry="140" transform="rotate(45 256 256)" />
+      <ellipse cx="256" cy="110" rx="90" ry="140" transform="rotate(90 256 256)" />
+      <ellipse cx="256" cy="110" rx="90" ry="140" transform="rotate(135 256 256)" />
+      <ellipse cx="256" cy="110" rx="90" ry="140" transform="rotate(180 256 256)" />
+      <ellipse cx="256" cy="110" rx="90" ry="140" transform="rotate(225 256 256)" />
+      <ellipse cx="256" cy="110" rx="90" ry="140" transform="rotate(270 256 256)" />
+      <ellipse cx="256" cy="110" rx="90" ry="140" transform="rotate(315 256 256)" />
+    </g>
+    <g fill="#d0617f" stroke="#a54464" stroke-width="4">
+      <ellipse cx="256" cy="150" rx="65" ry="110" transform="rotate(22.5 256 256)" />
+      <ellipse cx="256" cy="150" rx="65" ry="110" transform="rotate(67.5 256 256)" />
+      <ellipse cx="256" cy="150" rx="65" ry="110" transform="rotate(112.5 256 256)" />
+      <ellipse cx="256" cy="150" rx="65" ry="110" transform="rotate(157.5 256 256)" />
+      <ellipse cx="256" cy="150" rx="65" ry="110" transform="rotate(202.5 256 256)" />
+      <ellipse cx="256" cy="150" rx="65" ry="110" transform="rotate(247.5 256 256)" />
+      <ellipse cx="256" cy="150" rx="65" ry="110" transform="rotate(292.5 256 256)" />
+      <ellipse cx="256" cy="150" rx="65" ry="110" transform="rotate(337.5 256 256)" />
+    </g>
+    <g>
+      <ellipse cx="140" cy="310" rx="70" ry="45" fill="#5c8c60" stroke="#416e4e" stroke-width="4" transform="rotate(-10 140 310)" />
+      <ellipse cx="372" cy="310" rx="70" ry="45" fill="#5c8c60" stroke="#416e4e" stroke-width="4" transform="rotate(10 372 310)" />
+    </g>
+    <g>
+      <rect x="164" y="196" width="184" height="156" rx="48" fill="#3b4450" stroke="#1f2328" stroke-width="8" />
+      <rect x="182" y="214" width="148" height="120" rx="38" fill="#4f5966" opacity="0.35" />
+      <circle cx="220" cy="262" r="18" fill="#7de6dc" />
+      <circle cx="292" cy="262" r="18" fill="#7de6dc" />
+      <circle cx="220" cy="262" r="6" fill="#ffffff" />
+      <circle cx="292" cy="262" r="6" fill="#ffffff" />
+      <ellipse cx="206" cy="292" rx="14" ry="9" fill="#f08faa" opacity="0.85" />
+      <ellipse cx="306" cy="292" rx="14" ry="9" fill="#f08faa" opacity="0.85" />
+      <path d="M234 284 Q256 304 278 284" fill="none" stroke="#7de6dc" stroke-width="5" stroke-linecap="round" />
+    </g>
+    <g fill="#f0d36e">
+      <circle cx="236" cy="152" r="6" />
+      <circle cx="256" cy="148" r="6" />
+      <circle cx="276" cy="152" r="6" />
+    </g>
+  </g>
+</svg>

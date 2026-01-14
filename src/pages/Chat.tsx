@@ -3,7 +3,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Send, ArrowLeft, Sparkles, RefreshCw } from "lucide-react";
 import { markdownToHtml } from "@/lib/markdown";
-import logoImage from "@/assets/logo-nature.png";
+import logoImage from "@/assets/logo-floria.svg";
 import { useChatHistory, type ChatMessage } from "@/hooks/use-chat-history";
 import { useChatSession } from "@/hooks/use-chat-session";
 import { formatChatReply, sendChatMessage } from "@/lib/chat-api";
