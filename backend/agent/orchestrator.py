@@ -409,7 +409,7 @@ def _extract_plant(message: str) -> Optional[str]:
 
                 return k["nom_latin"].replace(" ", "-")
 
-    m = re.search(r"\b(mon|ma|mes)\s+([a-zàâçéèêëîïôûùüÿñæœ-]{3,})\b", msg)
+    m = re.search(r"\b(mon|ma|mes)\s+([a-zàâçéèêëîïôûùüÿñæœ-]{3,})\b", message.lower())
     if m:
         candidate = m.group(2)
         if candidate not in ["plante", "feuille", "feuilles", "pot", "terreau"]:

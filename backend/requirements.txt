@@ -3,3 +3,4 @@ pydantic
 uvicorn[standard]
 requests
 beautifulsoup4
+unicodedata2
