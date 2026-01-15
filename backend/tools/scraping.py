@@ -45,7 +45,7 @@ def _clean_soup(soup: BeautifulSoup) -> None:
 
     for tag in soup.find_all(["header", "footer", "nav", "aside", "form", "button"]):
         tag.decompose()
-    
+
     # Supprime les éléments de publicité et tracking
     for tag in soup.find_all(class_=re.compile(r"(ad|pub|tracking|social|share|cookie)", re.I)):
         tag.decompose()
@@ -85,13 +85,13 @@ def _extract_structured_info(soup: BeautifulSoup, text: str) -> str:
         "substrat", "terreau", "engrais", "rempotage", "taille",
         "multiplication", "maladies", "parasites", "toxicité"
     ]
-    
+
     extracted_sections = []
-    
+
     # Cherche des titres (h2, h3, strong) contenant ces mots-clés
     for heading in soup.find_all(["h2", "h3", "h4", "strong", "b"]):
         heading_text = heading.get_text(strip=True).lower()
-        
+
         for keyword in sections_keywords:
             if keyword in heading_text:
                 # Récupère le paragraphe suivant
@@ -100,10 +100,10 @@ def _extract_structured_info(soup: BeautifulSoup, text: str) -> str:
                     section_text = next_elem.get_text(separator=" ", strip=True)
                     if len(section_text) > 30:
                         extracted_sections.append(f"{heading.get_text(strip=True)}: {section_text}")
-    
+
     if extracted_sections:
         return "\n".join(extracted_sections[:10])  # Max 10 sections
-    
+
     return text
 
 
@@ -143,27 +143,27 @@ def _try_scrape_url(url: str, source_name: str) -> Optional[Dict]:
     """
     try:
         response = requests.get(
-            url, 
+            url,
             timeout=10,
             headers={'User-Agent': 'FlorIA-Bot/1.0 (Educational Project)'}
         )
-        
+
         # Si 404 ou autre erreur, passer
         if response.status_code != 200:
             return None
 
         soup = BeautifulSoup(response.text, "html.parser")
-        
+
         # Nettoyage
         _clean_soup(soup)
-        
+
         # Extraction structurée d'abord
         text = _extract_structured_info(soup, "")
-        
+
         # Si pas de sections trouvées, extraction classique
         if not text or len(text) < 100:
             text = _extract_main_text(soup)
-        
+
         text = _keep_useful_lines(text, max_lines=40)
 
         # Limite stricte pour Ollama
@@ -231,15 +231,15 @@ SEARCH_STRATEGIES = {
 def fetch_plant_sources(query: str, limit: int = 3) -> Dict:
     """
     Tool MCP amélioré : recherche intelligente multi-sources.
-    
+
     Args:
         query: nom de la plante
         limit: nombre maximum de sources
-    
+
     Returns:
         Dict avec query, summary, sources
     """
-    
+
     if not query or not query.strip():
         return {"query": query, "summary": None, "sources": []}
 
@@ -254,17 +254,17 @@ def fetch_plant_sources(query: str, limit: int = 3) -> Dict:
 
         source_name = source["name"]
         strategy = SEARCH_STRATEGIES.get(source_name)
-        
+
         if not strategy:
             continue
 
         # Obtenir les URLs à essayer pour cette source
         urls_to_try = strategy(query)
-        
+
         # Essayer chaque URL jusqu'à ce qu'une fonctionne
         for url in urls_to_try:
             result = _try_scrape_url(url, source_name)
-            
+
             if result:
                 print(f"✅ Trouvé sur {source_name}: {url}")
                 all_content.append(result["content"])
