@@ -1,3 +1,5 @@
+### Repository: https://github.com/chaimaabella/FlorIA
+
 # 🌱 FlorIA
 
 > Assistant conversationnel intelligent pour prendre soin de vos plantes
